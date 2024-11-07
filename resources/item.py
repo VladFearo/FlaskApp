@@ -3,6 +3,7 @@ from flask import request
 from flask.views import MethodView
 from flask_smorest import abort, Blueprint
 from db import items
+from schemas import ItemSchema, ItemUpdateSchema
 
 
 blp = Blueprint("items", __name__, description="Item operations")
@@ -22,10 +23,8 @@ class Item(MethodView):
         except KeyError:
             abort(404, message="Item not found.")
     
-    def put(self, item_id):
-        item_data = request.get_json()
-        if "price" not in item_data or "name" not in item_data:
-            abort(400, message="Missing required fields (name or price).")
+    @blp.arguments(ItemUpdateSchema)
+    def put(self,item_data, item_id):
         try:
             item = items[item_id]
             item |= item_data # merge dictionaries to update item
@@ -40,14 +39,8 @@ class ItemList(MethodView):
     def get(self):
         return {"items": list(items.values())}
 
-    def post(self):
-        item_data = request.get_json()
-        if(
-            "name" not in item_data or
-            "price" not in item_data or
-            "store_id" not in item_data
-        ):
-            abort(400, message="Missing required fields (name price or store id).")
+    @blp.arguments(ItemSchema)
+    def post(self, item_data):
         for item in items.values():
             if(
             item_data["name"] == item["name"]
