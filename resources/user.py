@@ -7,7 +7,7 @@ from models import UserModel
 from schemas import UserSchema
 
 
-blp = Blueprint('users', 'users', decription='User related operations')
+blp = Blueprint('Users', 'users', description='User related operations')
 
 @blp.route('/register')
 class UserRegister(MethodView):
@@ -31,15 +31,6 @@ class UserRegister(MethodView):
 class User(MethodView):
     @blp.response(200, UserSchema)
     def get(self, user_id):
-        user = UserModel.query.get(user_id)
-        if not user:
-            abort(404, message='User not found')
-        
-        return user_schema.dump(user)
-    
-    @blp.arguments(UserSchema)
-    @blp.response(200, UserSchema)
-    def put(self, user_data, user_id):
         user = UserModel.query.get_or_404(user_id)
         return user
     
