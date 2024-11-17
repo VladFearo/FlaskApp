@@ -4,6 +4,8 @@ from flask.views import MethodView
 from flask_smorest import abort, Blueprint
 from schemas import StoreSchema
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from flask_jwt_extended import jwt_required
+
 
 from models import StoreModel
 from db import db
@@ -32,6 +34,7 @@ class StoreList(MethodView):
     def get(self):
         return StoreModel.query.all()
 
+    @jwt_required()
     @blp.arguments(StoreSchema)
     @blp.response(201, StoreSchema)
     def post(self, store_data):
