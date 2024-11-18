@@ -54,6 +54,9 @@ def create_app(db_url=None):
     def missing_token_callback(error):
         return jsonify({"message": "Request does not contain an access token", "error": "authorization_required"}), 401
 
+    @jwt.needs_fresh_token_loader
+    def needs_fresh_token_callback():
+        return jsonify({"description": "Fresh token required", "error": "fresh_token_required"}), 401
 
     with app.app_context():
         db.create_all()
