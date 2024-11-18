@@ -44,12 +44,12 @@ class UserRefresh(MethodView):
     @jwt_required(refresh=True)
     def post(self):
         user_id = get_jwt_identity()
-        access_token = create_access_token(identity=user_id, fresh=False)
-        return {'access_token': access_token}, 200
+        new_token = create_access_token(identity=user_id, fresh=False)
+        return {'access_token': new_token}, 200
 
 @blp.route('/logout')
 class UserLogout(MethodView):
-    @jwt_required()
+    @jwt_required(fresh=False)
     def post(self):
         jti = get_jwt()['jti']
         db.session.add(TokenBlocklistModel(jti=jti))
@@ -63,7 +63,7 @@ class User(MethodView):
         user = UserModel.query.get_or_404(user_id)
         return user
     
-    @jwt_required()
+    @jwt_required(fresh=True)
     def delete(self, user_id):
         user = UserModel.query.get_or_404(user_id)
         db.session.delete(user)
