@@ -9,6 +9,7 @@ from resources.store import blp as StoreBlueprint
 from resources.tag import blp as TagBlueprint
 from resources.user import blp as UserBlueprint
 
+from models import TokenBlocklistModel
 
 from db import db
 import models
@@ -30,6 +31,16 @@ def create_app(db_url=None):
     api = Api(app)
     app.config["JWT_SECRET_KEY"] = "<Rpe9BDx{SuNva1" # Change this later
     jwt = JWTManager(app)
+
+    @jwt.token_in_blocklist_loader
+    def check_if_token_in_blocklist(jwt_header, jwt_payload):
+        jti = jwt_payload["jti"]
+        token = TokenBlocklistModel.query.filter_by(jti=jti).first()
+        return token is not None
+    
+    @jwt.revoked_token_loader
+    def revoked_token_callback():
+        return jsonify({"description": "Token has been revoked.", "error": "token_revoked"}), 401
 
     @jwt.expired_token_loader
     def expired_token_callback():
